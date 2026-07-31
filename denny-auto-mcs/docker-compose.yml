@@ -1,32 +1,35 @@
-version: "3.7"
-
+version: "3"
 services:
-  app_proxy:
-    environment:
-      APP_HOST: denny-auto-mcs_app_1
-      APP_PORT: 8080
-
   app:
-    image: macarooniman/auto-mcs:2.3.3@sha256:76db7675f9d6893b09034d62d5a6f404151e26c0c7efb6de1c54ee26f9cdeda3
-    command: [
-      "auto-mcs-ttyd",
-      "-W",
-      "-t", "disableLeaveAlert=true",
-      "-t", "titleFixed=auto-mcs",
-      "-t", "fontSize=20",
-      "-t", "theme={\"background\": \"#1A1A1A\"}",
-      "-p", "8080",
-      "-c", "root:auto-mcs",
-      "tmux", "-u", "-2", "new", "-A",
-      "-s", "auto-mcs",
-      "-c", ".",
-      "./auto-mcs"
-    ]
+    image: macarooniman/auto-mcs:latest
+    container_name: auto-mcs
     stdin_open: true
     tty: true
-    restart: on-failure
-    volumes:
-      - ${APP_DATA_DIR}/data:/root/.auto-mcs
+    restart: unless-stopped
+
+    environment:
+
+      # Default web interface port
+      WEB_PORT: "8080"
+
+      # Change the web interface credentials
+      # THESE NEED TO BE CHANGED BEFORE RUNNING!
+      WEB_USERNAME: "root"
+      WEB_PASSWORD: "auto-mcs"
+
     ports:
+
+      # Web interface (make this the same as WEB_PORT)
+      - "8080:8080"
+
+      # Telepath API (auto-mcs)
       - "7001:7001"
+
+      # Add more ports based on the servers you create
       - "25565:25565"
+
+    volumes:
+      - auto-mcs-data:/root/.auto-mcs
+
+volumes:
+  auto-mcs-data:
